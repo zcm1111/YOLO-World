@@ -354,18 +354,29 @@ class YOLOWorldHead(YOLOv8Head):
 
     """YOLO World v8 head."""
 
-    def loss(self, img_feats: Tuple[Tensor], txt_feats: Tensor,
-             txt_masks: Tensor, batch_data_samples: Union[list, dict]) -> dict:
+    def loss(self, img_feats: Tuple[Tensor], txt_feats: Tensor, txt_masks: Tensor,
+             batch_data_samples: Union[list, dict]) -> dict:
         """Perform forward propagation and loss calculation of the detection
         head on the features of the upstream network."""
 
         outs = self(img_feats, txt_feats, txt_masks)
-        # Fast version
-        loss_inputs = outs + (batch_data_samples['bboxes_labels'],
-                              batch_data_samples['img_metas'])
-        losses = self.loss_by_feat(*loss_inputs)
 
-        return losses
+        # 修复：正确处理不同类型的batch_data_samples
+        if isinstance(batch_data_samples, list):
+            # 当batch_data_samples是列表时，使用unpack_gt_instances解析
+            outputs = unpack_gt_instances(batch_data_samples)
+            (batch_gt_instances, batch_gt_instances_ignore,
+             batch_img_metas) = outputs
+            loss_inputs = outs + (txt_masks, batch_gt_instances, batch_img_metas,
+                                  batch_gt_instances_ignore)
+        else:
+            # 当batch_data_samples是字典时，直接从字典中获取需要的字段
+            # 这种情况下，batch_gt_instances_ignore设置为None
+            loss_inputs = outs + (txt_masks, batch_data_samples['bboxes_labels'],
+                                  batch_data_samples['img_metas'], None)
+
+            losses = self.loss_by_feat(*loss_inputs)
+            return losses
 
     def loss_and_predict(
         self,

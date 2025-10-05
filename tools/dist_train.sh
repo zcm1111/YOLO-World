@@ -1,4 +1,5 @@
-#!/usr/bin/env bash
+# 设置使用的GPU设备
+CUDA_VISIBLE_DEVICES=4,5,6,7
 
 CONFIG=$1
 GPUS=$2
@@ -8,7 +9,7 @@ PORT=${MASTER_PORT:-29500}
 MASTER_ADDR=${MASTER_ADDR:-"127.0.0.1"}
 
 PYTHONPATH="$(dirname $0)/..":$PYTHONPATH \
-python -m torch.distributed.launch \
+torchrun \
     --nnodes=$NNODES \
     --node_rank=$NODE_RANK \
     --master_addr=$MASTER_ADDR \

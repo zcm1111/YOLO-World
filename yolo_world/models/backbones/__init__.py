@@ -7,10 +7,14 @@ from .mm_backbone import (
     HuggingVisionBackbone,
     HuggingCLIPLanguageBackbone,
     PseudoLanguageBackbone)
+# 导入我们新实现的MobileResNet
+from .mobile_resnet import MobileResNet, MobileResNet18
 
 __all__ = [
     'MultiModalYOLOBackbone',
     'HuggingVisionBackbone',
     'HuggingCLIPLanguageBackbone',
-    'PseudoLanguageBackbone'
+    'PseudoLanguageBackbone',
+    'MobileResNet',
+    'MobileResNet18'
 ]
